@@ -1,5 +1,6 @@
 import sys
 import time
+import json
 
 from pyaxidraw import axidraw
 
@@ -14,7 +15,7 @@ class Axi:
         self.pen_up_percent = 90
         self.pen_down_percent = 20
         self.setup_servo_range()
-        self.set_pen_depth_range(0.1, 0.9)
+        self.load_pen_depth()
 
     def connect(self):
         self.ad.interactive()
@@ -43,17 +44,42 @@ class Axi:
         print("pen up (servo min):", self.pen_fully_up_pos)
         print("pen down (servo max):", self.pen_fully_down_pos)
 
-    def set_pen_depth_range(self, min, max):
+    def load_pen_depth(self):
+        try:
+            with open("config.json", "r") as f:
+                config = json.load(f)
+
+            self.set_pen_depth_range(
+                config["pen_depth_range_min"], config["pen_depth_range_max"]
+            )
+
+        except:
+            self.set_pen_depth_range(0.1, 0.3)
+
+    def save_pen_depth(self):
+        config = {
+            "pen_depth_range_min": self.pen_depth_range[0],
+            "pen_depth_range_max": self.pen_depth_range[1],
+        }
+        with open("config.json", "w") as f:
+            json.dump(config, f)
+
+    def set_pen_depth_range(self, min_depth, max_depth):
         """
         Set depth range relative to max servo range
         (becomes subrange or trimmed servo range)
         """
+
+        # ensure max is greater than or equal to min
+        max_depth = max(max_depth, min_depth)
+
+        self.pen_depth_range = [min_depth, max_depth]
         self.pen_min_depth = (
-            min * (self.pen_fully_down_pos - self.pen_fully_up_pos)
+            min_depth * (self.pen_fully_down_pos - self.pen_fully_up_pos)
             + self.pen_fully_up_pos
         )
         self.pen_max_depth = (
-            max * (self.pen_fully_down_pos - self.pen_fully_up_pos)
+            max_depth * (self.pen_fully_down_pos - self.pen_fully_up_pos)
             + self.pen_fully_up_pos
         )
         print(
@@ -66,6 +92,7 @@ class Axi:
             self.pen_fully_down_pos,
             ")",
         )
+        self.save_pen_depth()
 
     def send_command(self):
         # docs at: http://evil-mad.github.io/EggBot/ebb.html#S2
@@ -104,15 +131,3 @@ class Axi:
 
         print("pen pos", self.pen_position)
         # TODO: send command
-
-
-# TODO:
-# need to set a pen depth for just touching and for lowest
-# also a raised position for travel
-
-# axi = Axi()
-# axi.connect()
-
-
-# except KeyboardInterrupt:
-# axi.disconnect()
