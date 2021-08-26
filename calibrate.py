@@ -15,12 +15,18 @@ class Calibration:
 
     def __init__(self):
         self.axi = axi.Axi()
-        self.calibration_bump = 0.01
+        self.axi.connect()
+        self.calibration_bump = 0.004
         self.restart()
+        self.preview_y_offset = 0
+        self.preview_y_dir = 1
 
     def restart(self):
         self.step = 0
         self.axi.set_pen_up()
+
+    def end(self):
+        self.axi.disconnect()
 
     def step_instructions(self):
         if self.step == 0:
@@ -43,7 +49,7 @@ class Calibration:
             return [
                 "Set max pen depth (lowest drawing point)",
                 "Lower tip until it draws a THICK line",
-                "(careful not to hit the end of range)"
+                "(careful not to hit the end of range)",
                 "[up/down arrows, space to test line]",
                 "(enter to restart, ESC to quit)",
             ]
@@ -65,6 +71,8 @@ class Calibration:
             range[0] = range[0] + self.calibration_bump
         elif self.step == 2:
             range[1] = range[1] + self.calibration_bump
+        else:
+            return
         self.axi.set_pen_depth_range(range[0], range[1])
         self.axi.set_pen_depth(0.0 if self.step == 1 else 1.0)
 
@@ -74,6 +82,8 @@ class Calibration:
             range[0] = range[0] - self.calibration_bump
         elif self.step == 2:
             range[1] = range[1] - self.calibration_bump
+        else:
+            return
         self.axi.set_pen_depth_range(range[0], range[1])
         self.axi.set_pen_depth(0.0 if self.step == 1 else 1.0)
 
@@ -82,8 +92,14 @@ class Calibration:
         self.restart()
 
     def input_space(self):
-        # TODO: draw a line and reset position
-        pass
+        """
+        Does calibration lines like Prusa printers
+        """
+        move = self.preview_y_dir * 10
+        self.axi.goto(move, self.preview_y_offset)
+        self.preview_y_offset += 2
+        self.axi.goto(move, self.preview_y_offset)
+        self.preview_y_dir = -self.preview_y_dir
 
     def draw_status(self, win):
         bgcolor = 50, 50, 50
@@ -171,6 +187,8 @@ def main():
 
         pg.display.flip()
         pg.time.wait(10)
+
+    cali.end()
 
     pg.quit()
     raise SystemExit

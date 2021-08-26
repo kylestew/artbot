@@ -22,8 +22,21 @@ class Axi:
         connected = self.ad.connect()
         if not connected:
             sys.exit()
+        self.set_options()
+
+    def set_options(self):
+        axi = self.ad
+        axi.options.units = 1
+        axi.options.speed_pendown = 10
+        axi.options.speed_penup = 10
+        axi.update()
 
     def disconnect(self):
+        # unlock motors
+        self.ad.plot_setup()
+        self.ad.options.mode = "manual"
+        self.ad.options.manual_cmd = "disable_xy"
+        self.ad.plot_run()
         self.ad.disconnect()
 
     def setup_servo_range(self):
@@ -94,29 +107,16 @@ class Axi:
         )
         self.save_pen_depth()
 
-    def send_command(self):
-        # docs at: http://evil-mad.github.io/EggBot/ebb.html#S2
-        # command = "S2," + str(position) + "," + str(port_pin) + "\r"
-
-        # # Optional debug statements:
-        # if pen_is_up:
-        #     print("Raising pen")
-        # else:
-        #     print("Lowering pen")
-        # print("New servo position: " + str(position))
-        # print("command: " + command)
-
-        # ad.usb_command(command + "\r")
-
-        # time.sleep(wait_time_s)
-        pass
+    def send_pen_pos(self):
+        command = "S2," + str(int(self.pen_position)) + "," + str(self.port_pin) + "\r"
+        # print(command)
+        self.ad.usb_command(command + "\r")
 
     def set_pen_up(self):
         """Not touching paper - for traveling"""
         self.pen_is_up = True
         self.pen_position = self.pen_fully_up_pos
-        print("pen pos", self.pen_position)
-        # TODO: send command
+        self.send_pen_pos()
 
     def set_pen_depth(self, depth):
         """
@@ -124,10 +124,13 @@ class Axi:
         """
         self.pen_is_up = False
         depth = min(max(depth, 0.0), 1.0)
-
         self.pen_position = (
             depth * (self.pen_max_depth - self.pen_min_depth) + self.pen_min_depth
         )
+        self.send_pen_pos()
 
-        print("pen pos", self.pen_position)
-        # TODO: send command
+    def current_pos(self):
+        return self.ad.current_pos()
+
+    def goto(self, xpos, ypos):
+        self.ad.goto(xpos, ypos)
