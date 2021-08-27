@@ -12,8 +12,8 @@ class Axi:
         self.port_pin = 4  # Logical pin RP4 drives the output labeled "B1", from
 
         self.pen_is_up = False
-        self.pen_up_percent = 90
-        self.pen_down_percent = 20
+        self.pen_up_percent = 96
+        self.pen_down_percent = 30
         self.setup_servo_range()
         self.load_pen_depth()
 
@@ -116,6 +116,14 @@ class Axi:
         """Not touching paper - for traveling"""
         self.pen_is_up = True
         self.pen_position = self.pen_fully_up_pos
+        self.send_pen_pos()
+
+    def set_pen_down(self):
+        """
+        For attaching gear rack
+        """
+        self.pen_is_up = False
+        self.pen_position = self.pen_fully_down_pos
         self.send_pen_pos()
 
     def set_pen_depth(self, depth):

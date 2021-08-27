@@ -6,11 +6,12 @@ from axi import axi
 
 class Calibration:
     """
-    3 step process
+    4 step process
 
-    1) Move to top of servo extent - attach gear and pen
-    2) Set upper limit (thin stroke)
-    3) Set lower limit (fat stroke)
+    1) Attach
+    2) Set travel (top)
+    3) Set upper limit (thin stroke)
+    4) Set lower limit (fat stroke)
     """
 
     def __init__(self):
@@ -23,7 +24,7 @@ class Calibration:
 
     def restart(self):
         self.step = 0
-        self.axi.set_pen_up()
+        self.axi.set_pen_down()
 
     def end(self):
         self.axi.disconnect()
@@ -31,64 +32,91 @@ class Calibration:
     def step_instructions(self):
         if self.step == 0:
             return [
-                "At top position",
+                "STEP 0:",
+                "At bottom position",
                 "Attach gear rack (if not attached)",
-                "Attach marker at travel height",
-                "It should clear paper (not leave a mark)",
+                "As close to metal mounting block as possible",
                 "[DELETE to reset range]",
-                "(enter -> next step)",
+                "| next ->",
             ]
         if self.step == 1:
             return [
+                "STEP 1:",
+                "At top position",
+                "Attach marker at travel height",
+                "It should clear paper (not leave a mark)",
+                "<- prev | next ->",
+            ]
+        if self.step == 2:
+            return [
+                "STEP 2:",
                 "Set min pen depth (highest drawing point)",
                 "Lower tip until it draws a THIN line",
                 "[up/down arrows, space to test line]",
-                "(enter -> next step)",
+                "<- prev | next ->",
             ]
         else:
             return [
+                "STEP 3:",
                 "Set max pen depth (lowest drawing point)",
                 "Lower tip until it draws a THICK line",
                 "(careful not to hit the end of range)",
                 "[up/down arrows, space to test line]",
-                "(enter to restart, ESC to quit)",
+                "<- prev |",
             ]
 
     def input_enter(self):
         if self.step == 0:
             self.step = 1
-            self.axi.set_pen_depth(0.0)
+            self.axi.set_pen_up()
         elif self.step == 1:
             self.step = 2
+            self.axi.set_pen_depth(0.0)
+        elif self.step == 2:
+            self.step = 3
+            self.axi.set_pen_depth(1.0)
+
+    def input_left_arrow(self):
+        if self.step == 2:
+            self.step = 1
+            self.axi.set_pen_up()
+        elif self.step == 3:
+            self.step = 2
+            self.axi.set_pen_depth(0.0)
+        elif self.step == 4:
+            self.step = 3
             self.axi.set_pen_depth(1.0)
         else:
             self.step = 0
-            self.axi.set_pen_up()
+            self.axi.set_pen_down()
+
+    def input_right_arrow(self):
+        self.input_enter()
 
     def input_down(self):
         range = self.axi.pen_depth_range
-        if self.step == 1:
+        if self.step == 2:
             range[0] = range[0] + self.calibration_bump
-        elif self.step == 2:
+        elif self.step == 3:
             range[1] = range[1] + self.calibration_bump
         else:
             return
         self.axi.set_pen_depth_range(range[0], range[1])
-        self.axi.set_pen_depth(0.0 if self.step == 1 else 1.0)
+        self.axi.set_pen_depth(0.0 if self.step == 2 else 1.0)
 
     def input_up(self):
         range = self.axi.pen_depth_range
-        if self.step == 1:
+        if self.step == 2:
             range[0] = range[0] - self.calibration_bump
-        elif self.step == 2:
+        elif self.step == 3:
             range[1] = range[1] - self.calibration_bump
         else:
             return
         self.axi.set_pen_depth_range(range[0], range[1])
-        self.axi.set_pen_depth(0.0 if self.step == 1 else 1.0)
+        self.axi.set_pen_depth(0.0 if self.step == 2 else 1.0)
 
     def input_delete(self):
-        self.axi.set_pen_depth_range(0.1, 0.2)
+        self.axi.set_pen_depth_range(0.5, 0.75)
         self.restart()
 
     def input_space(self):
@@ -169,6 +197,10 @@ def main():
                     running = False
                 elif e.key == pg.K_RETURN:
                     cali.input_enter()
+                elif e.key == pg.K_RIGHT:
+                    cali.input_right_arrow()
+                elif e.key == pg.K_LEFT:
+                    cali.input_left_arrow()
                 elif e.key == pg.K_DELETE:
                     cali.input_delete()
                 elif e.key == pg.K_BACKSPACE:
