@@ -12,8 +12,8 @@ class Axi:
         self.port_pin = 4  # Logical pin RP4 drives the output labeled "B1", from
 
         self.pen_is_up = False
-        self.pen_up_percent = 96
-        self.pen_down_percent = 30
+        self.pen_up_percent = 98
+        self.pen_down_percent = 10
         self.setup_servo_range()
         self.load_pen_depth()
 
@@ -26,7 +26,7 @@ class Axi:
 
     def set_options(self):
         axi = self.ad
-        axi.options.units = 1
+        axi.options.units = 2  # mm
         axi.options.speed_pendown = 10
         axi.options.speed_penup = 10
         axi.update()

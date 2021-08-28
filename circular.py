@@ -10,7 +10,7 @@ axi.set_pen_up()
 time.sleep(0.5)
 
 # workspace: 18 x 18 cm
-center = [9, 9]
+center = [120, 120]
 axi.goto(center[0], center[1])
 spirals = 6
 sweeps = 800
@@ -19,7 +19,7 @@ rad = 0
 for theta in thetas:
     x = math.sin(theta) * rad + center[0]
     y = math.cos(theta) * rad + center[1]
-    rad += 0.01
+    rad += 0.1
     depth = math.sin(1.6 * theta) * 0.5 + 0.5
     axi.set_pen_depth(depth)
     axi.goto(x, y)

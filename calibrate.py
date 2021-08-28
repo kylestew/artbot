@@ -123,9 +123,9 @@ class Calibration:
         """
         Does calibration lines like Prusa printers
         """
-        move = self.preview_y_dir * 10
+        move = self.preview_y_dir * 100
         self.axi.goto(move, self.preview_y_offset)
-        self.preview_y_offset += 2
+        self.preview_y_offset += 20
         self.axi.goto(move, self.preview_y_offset)
         self.preview_y_dir = -self.preview_y_dir
 
