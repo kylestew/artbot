@@ -9,7 +9,8 @@ AxiDraw V3 - A4 (297 × 210 mm)
 
 
 def _setup(width=297, height=210, dpmm=4):
-    global _plotting, _pen_depth, _w, _h, _dpmm, _width_mm, _height_mm, _sur, _ctx
+    global _plotting, _pen_depth, _w, _h, _dpmm, _width_mm, _height_mm, _sur, _ctx, _axi
+    _axi = None
     _plotting = False
     _pen_depth = 0
     # physical plotting dimensions
@@ -23,16 +24,17 @@ def _setup(width=297, height=210, dpmm=4):
     _ctx = cairo.Context(_sur)
 
 
-def begin_plotting(simulate=False):
+def begin_plotting(debug=False):
     global _plotting, _axi
     _plotting = True
-    _axi = axi.Axi()
-    if simulate == False:
-        _axi.connect()
+    _axi = axi.Axi(debug=debug)
+    _axi.connect()
     _axi.set_pen_up()
 
 
 def end_plotting():
+    if _axi == None:
+        return
     _axi.set_pen_up()
     _axi.move_to(0, 0)
     _axi.disconnect()
@@ -69,6 +71,7 @@ def set_range(r0, r1):
 
 def pixel_point_to_mm(xy):
     x, y = xy
+    y = -y
     scale = _scale / _dpmm
     return (x * scale + _width_mm / 2.0, y * scale + _height_mm / 2.0)
 
@@ -94,7 +97,8 @@ def set_line_depth(depth):
 
 
 def end_segment():
-    _axi.set_pen_up()
+    if _plotting:
+        _axi.set_pen_up()
 
 
 def line(x0, y0, x1, y1):

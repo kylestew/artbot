@@ -5,7 +5,7 @@ from numpy import linspace
 
 
 canvas._setup()
-canvas.begin_plotting()
+canvas.begin_plotting(simulate=True)
 canvas.clear([1, 1, 1, 1])
 canvas.set_range(-1, 1)
 canvas.set_color([0, 0, 0, 1])

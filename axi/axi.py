@@ -6,7 +6,8 @@ from pyaxidraw import axidraw
 
 
 class Axi:
-    def __init__(self):
+    def __init__(self, debug=False):
+        self.debug = debug
         self.ad = axidraw.AxiDraw()
 
         self.port_pin = 4  # Logical pin RP4 drives the output labeled "B1", from
@@ -19,6 +20,8 @@ class Axi:
 
     def connect(self):
         self.ad.interactive()
+        if self.debug:
+            return
         connected = self.ad.connect()
         if not connected:
             sys.exit()
@@ -109,8 +112,10 @@ class Axi:
 
     def send_pen_pos(self):
         command = "S2," + str(int(self.pen_position)) + "," + str(self.port_pin) + "\r"
-        # print(command)
-        self.ad.usb_command(command + "\r")
+        if self.debug:
+            print(command)
+        else:
+            self.ad.usb_command(command + "\r")
 
     def set_pen_up(self):
         """Not touching paper - for traveling"""
@@ -141,15 +146,19 @@ class Axi:
         return self.ad.current_pos()
 
     def goto(self, xpos, ypos):
-        # print("goto:", xpos, ypos)
-        self.ad.options.speed_pendown = 50
-        self.ad.options.speed_penup = 50
-        self.ad.update()
-        self.ad.goto(xpos, ypos)
+        if self.debug:
+            print("goto:", xpos, ypos)
+        else:
+            self.ad.options.speed_pendown = 50
+            self.ad.options.speed_penup = 50
+            self.ad.update()
+            self.ad.goto(xpos, ypos)
 
     def move_to(self, xpos, ypos):
-        # print("move_to:", xpos, ypos)
-        self.ad.options.speed_pendown = 80
-        self.ad.options.speed_penup = 80
-        self.ad.update()
-        self.ad.goto(xpos, ypos)
+        if self.debug:
+            print("move_to:", xpos, ypos)
+        else:
+            self.ad.options.speed_pendown = 80
+            self.ad.options.speed_penup = 80
+            self.ad.update()
+            self.ad.goto(xpos, ypos)

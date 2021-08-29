@@ -27,5 +27,4 @@ canvas.end_segment()
 canvas.end_plotting()
 canvas._ctx
 
-
 # %%
