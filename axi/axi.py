@@ -109,7 +109,7 @@ class Axi:
 
     def send_pen_pos(self):
         command = "S2," + str(int(self.pen_position)) + "," + str(self.port_pin) + "\r"
-        print(command)
+        # print(command)
         self.ad.usb_command(command + "\r")
 
     def set_pen_up(self):
@@ -141,5 +141,15 @@ class Axi:
         return self.ad.current_pos()
 
     def goto(self, xpos, ypos):
-        print("goto:", xpos, ypos)
+        # print("goto:", xpos, ypos)
+        self.ad.options.speed_pendown = 50
+        self.ad.options.speed_penup = 50
+        self.ad.update()
+        self.ad.goto(xpos, ypos)
+
+    def move_to(self, xpos, ypos):
+        # print("move_to:", xpos, ypos)
+        self.ad.options.speed_pendown = 80
+        self.ad.options.speed_penup = 80
+        self.ad.update()
         self.ad.goto(xpos, ypos)

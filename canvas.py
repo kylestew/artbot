@@ -23,17 +23,18 @@ def _setup(width=297, height=210, dpmm=4):
     _ctx = cairo.Context(_sur)
 
 
-def begin_plotting():
+def begin_plotting(simulate=False):
     global _plotting, _axi
-    _axi = axi.Axi()
-    _axi.connect()
-    _axi.set_pen_up()
     _plotting = True
+    _axi = axi.Axi()
+    if simulate == False:
+        _axi.connect()
+    _axi.set_pen_up()
 
 
 def end_plotting():
     _axi.set_pen_up()
-    _axi.goto(0, 0)
+    _axi.move_to(0, 0)
     _axi.disconnect()
 
 
@@ -87,8 +88,13 @@ def set_line_width(width):
 
 
 def set_line_depth(depth):
+    global _pen_depth
     _pen_depth = depth
     set_line_width(depth * 16)
+
+
+def end_segment():
+    _axi.set_pen_up()
 
 
 def line(x0, y0, x1, y1):
@@ -99,10 +105,9 @@ def line(x0, y0, x1, y1):
     if _plotting:
         xa, ya = pixel_point_to_mm((x0, y0))
         xb, yb = pixel_point_to_mm((x1, y1))
-        _axi.goto(xa, ya)
+        _axi.move_to(xa, ya)
         _axi.set_pen_depth(_pen_depth)
         _axi.goto(xb, yb)
-        _axi.set_pen_up()
 
 
 def circle(x, y, r, fill=False):

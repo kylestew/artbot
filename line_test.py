@@ -1,5 +1,4 @@
 #%%
-%load_ext nothing.helpers.ipython_cairo
 import canvas
 
 from numpy import linspace
@@ -23,15 +22,6 @@ assert result == (43.5, 105)
 
 canvas.set_line_depth(0.5)
 line = Line((-1.0, 0), (1.0, 0))
-
-# split_count = 12
-# splits = linspace(0, 1, split_count + 1, endpoint=False)[1:]
-# segs = line.shatter(splits)
-# line_depths = linspace(0.0, 1.0, len(segs))
-
-# for itm in zip(segs, line_depths):
-#     canvas.set_line_depth(itm[1])
-#     itm[0].draw(canvas)
 
 line.draw(canvas)
 
