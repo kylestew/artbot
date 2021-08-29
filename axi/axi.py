@@ -46,8 +46,8 @@ class Axi:
         servo_max = self.ad.params.servo_max
         servo_range = servo_max - servo_min
         # servo operation is reversed
-        print("servo pushes pen down - min rotation is pen up position")
-        print("servo range: [", servo_min, servo_max, "]", servo_range)
+        # print("servo pushes pen down - min rotation is pen up position")
+        # print("servo range: [", servo_min, servo_max, "]", servo_range)
         self.pen_fully_down_pos = int(
             self.pen_up_percent * servo_range / 100 + servo_min
         )
@@ -109,7 +109,7 @@ class Axi:
 
     def send_pen_pos(self):
         command = "S2," + str(int(self.pen_position)) + "," + str(self.port_pin) + "\r"
-        # print(command)
+        print(command)
         self.ad.usb_command(command + "\r")
 
     def set_pen_up(self):
@@ -141,4 +141,5 @@ class Axi:
         return self.ad.current_pos()
 
     def goto(self, xpos, ypos):
+        print("goto:", xpos, ypos)
         self.ad.goto(xpos, ypos)
