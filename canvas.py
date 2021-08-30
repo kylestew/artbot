@@ -4,7 +4,7 @@ from axi import axi
 
 
 """
-AxiDraw V3 - A4 (297 × 210 mm)
+AxiDraw V3 - A4 (279.4 × 216 mm)
 """
 
 
@@ -93,7 +93,7 @@ def set_line_width(width):
 def set_line_depth(depth):
     global _pen_depth
     _pen_depth = depth
-    set_line_width(depth * 16)
+    set_line_width(depth * 12)
 
 
 def end_segment():
